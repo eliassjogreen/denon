@@ -32,50 +32,48 @@ export function parseArgs(args: string[] = Deno.args): Args {
     cmd: [],
   };
 
-  if ((args.includes("--config") || args.includes("-c")) && args.length > 1) {
-    flags.config = args[1];
-    args = args.slice(2);
-  }
-
-  if (args.includes("--help") || args.includes("-h")) {
-    flags.help = true;
-    args = args.slice(1);
-  }
-
-  if (args.includes("--version") || args.includes("-v")) {
-    flags.version = true;
-    args = args.slice(1);
-  }
-
-  if (args.includes("--init") || args.includes("-i")) {
-    const index = args.includes("--init")
-      ? args.indexOf("--init")
-      : args.indexOf("-i");
-    const next = args[index + 1];
-
-    if (next) {
-      flags.init = next;
-      args = args.slice(2);
-    } else {
-      flags.init = "json";
-      args = args.slice(1);
+  const indexOf = (...flags: string[]) => {
+    for (const flag of flags) {
+      const i = args.indexOf(flag);
+      if (i >= 0) {
+        return i;
+      }
     }
+    return -1;
+  };
+
+  const indexConfig = indexOf("--cfg");
+  if (indexConfig >= 0) {
+    flags.config = args.splice(indexConfig, 2)[1];
   }
 
-  if (args.includes("--upgrade") || args.includes("-u")) {
-    const index = args.includes("--upgrade")
-      ? args.indexOf("--upgrade")
-      : args.indexOf("-u");
-    const next = args[index + 1];
+  const indexHelp = indexOf("--help", "-h");
+  if (indexHelp >= 0) {
+    flags.help = true;
+    args.splice(indexHelp, 1);
+  }
 
-    if (next && (next === "latest" || reVersion.test(next))) {
-      flags.upgrade = !next.startsWith("v") || next !== "latest"
-        ? "v" + next
-        : next;
-      args = args.slice(2);
+  const indexVersion = indexOf("--version", "-v");
+  if (indexVersion >= 0) {
+    flags.version = true;
+    args.splice(indexVersion, 1);
+  }
+
+  const indexInit = indexOf("--init", "-i");
+  if (indexInit >= 0) {
+    const [, next] = args.splice(indexInit, 2);
+
+    flags.init = next || "json";
+  }
+
+  const indexUpgrade = indexOf("--upgrade", "-u");
+  if (indexUpgrade >= 0) {
+    const [, next] = args.splice(indexUpgrade, 2);
+
+    if (next && (next !== "latest" || reVersion.test(next))) {
+      flags.upgrade = !next.startsWith("v") ? "v" + next : next;
     } else {
       flags.upgrade = "latest";
-      args = args.slice(1);
     }
   }
 

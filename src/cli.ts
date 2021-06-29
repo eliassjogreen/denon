@@ -222,7 +222,7 @@ Options:
     -v --version            Show version.
     -i --init               Create config file in current working dir.
     -u --upgrade <version>  Upgrade to latest version. (default: master)
-    -c --config <file>      Use specific file as configuration.
+       --cfg <file>      Use specific file as configuration.
 `,
   );
 }
